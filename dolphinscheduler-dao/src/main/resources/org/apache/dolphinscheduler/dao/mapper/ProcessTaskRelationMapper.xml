@@ -73,7 +73,11 @@
         select
         <include refid="baseSql"/>
         from t_ds_process_task_relation
+<<<<<<< HEAD
         and process_definition_code = #{processDefinitionCode}
+=======
+        where process_definition_code = #{processDefinitionCode}
+>>>>>>> origin/jp-branch
         and pre_task_version >= 1
     </select>
     <select id="queryDownstreamByTaskCode" resultType="org.apache.dolphinscheduler.dao.entity.ProcessTaskRelation">
