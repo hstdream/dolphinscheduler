@@ -18,12 +18,9 @@
 package org.apache.dolphinscheduler.server.worker.processor;
 
 import org.apache.dolphinscheduler.common.Constants;
-import org.apache.dolphinscheduler.common.utils.CommonUtils;
-import org.apache.dolphinscheduler.common.utils.DateUtils;
-import org.apache.dolphinscheduler.common.utils.FileUtils;
-import org.apache.dolphinscheduler.common.utils.JSONUtils;
-import org.apache.dolphinscheduler.common.utils.NetUtils;
-import org.apache.dolphinscheduler.common.utils.OSUtils;
+import org.apache.dolphinscheduler.common.enums.ResUploadType;
+import org.apache.dolphinscheduler.common.storage.StorageOperateManager;
+import org.apache.dolphinscheduler.common.utils.*;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContext;
 import org.apache.dolphinscheduler.plugin.task.api.TaskExecutionContextCacheManager;
 import org.apache.dolphinscheduler.plugin.task.api.enums.ExecutionStatus;
@@ -84,6 +81,9 @@ public class TaskExecuteProcessor implements NettyRequestProcessor {
      */
     @Autowired
     private WorkerManagerThread workerManager;
+
+    @Autowired
+    private StorageOperateManager storageOperateManager;
 
     @Override
     public void process(Channel channel, Command command) {
@@ -161,7 +161,7 @@ public class TaskExecuteProcessor implements NettyRequestProcessor {
         }
 
         // submit task to manager
-        boolean offer = workerManager.offer(new TaskExecuteThread(taskExecutionContext, taskCallbackService, alertClientService, taskPluginManager));
+        boolean offer = workerManager.offer(new TaskExecuteThread(taskExecutionContext, taskCallbackService, alertClientService, taskPluginManager, storageOperateManager.storageOperate(ResUploadType.HDFS)));
         if (!offer) {
             logger.error("submit task to manager error, queue is full, queue size is {}, taskInstanceId: {}",
                     workerManager.getDelayQueueSize(), taskExecutionContext.getTaskInstanceId());
