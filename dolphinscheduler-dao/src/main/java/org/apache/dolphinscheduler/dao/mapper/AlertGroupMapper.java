@@ -19,8 +19,10 @@ package org.apache.dolphinscheduler.dao.mapper;
 
 import org.apache.dolphinscheduler.dao.entity.AlertGroup;
 
+import org.apache.dolphinscheduler.dao.entity.WorkerGroup;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -83,4 +85,12 @@ public interface AlertGroupMapper extends BaseMapper<AlertGroup> {
      */
     String queryAlertGroupInstanceIdsById(@Param("alertGroupId") int alertGroupId);
 
+    /**
+     * list authorized alertGroup
+     * @param userId
+     * @param alertGroupIds
+     * @param <T>
+     * @return
+     */
+    <T> List<AlertGroup> listAuthorizedAlertGroup (@Param("userId") int userId, @Param("alertGroupIds") T[] alertGroupIds);
 }

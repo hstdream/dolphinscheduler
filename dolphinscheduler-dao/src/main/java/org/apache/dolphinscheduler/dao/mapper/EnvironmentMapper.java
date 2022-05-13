@@ -19,8 +19,10 @@ package org.apache.dolphinscheduler.dao.mapper;
 
 import org.apache.dolphinscheduler.dao.entity.Environment;
 
+import org.apache.dolphinscheduler.dao.entity.WorkerGroup;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -68,4 +70,13 @@ public interface EnvironmentMapper extends BaseMapper<Environment> {
      * @return int
      */
     int deleteByCode(@Param("code") Long code);
+
+    /**
+     * list authorized environment
+     * @param userId
+     * @param environmentIds
+     * @param <T>
+     * @return
+     */
+    <T> List<Environment> listAuthorizedEnvironment (@Param("userId") int userId, @Param("environmentIds") T[] environmentIds);
 }
