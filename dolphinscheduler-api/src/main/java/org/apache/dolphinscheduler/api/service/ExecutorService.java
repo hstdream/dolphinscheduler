@@ -73,9 +73,10 @@ public interface ExecutorService {
      * @param projectCode project code
      * @param processDefinition process definition
      * @param processDefineCode process definition code
+     * @param verison process definition version
      * @return check result code
      */
-    Map<String, Object> checkProcessDefinitionValid(long projectCode, ProcessDefinition processDefinition, long processDefineCode);
+    Map<String, Object> checkProcessDefinitionValid(long projectCode, ProcessDefinition processDefinition, long processDefineCode, Integer verison);
 
     /**
      * check if the current process has subprocesses and all subprocesses are valid
@@ -102,4 +103,12 @@ public interface ExecutorService {
      * @return check result code
      */
     Map<String, Object> startCheckByProcessDefinedCode(long processDefinitionCode);
+
+    /**
+     * force start Task Instance
+     * @param loginUser
+     * @param queueId
+     * @return
+     */
+    Map<String, Object> forceStartTaskInstance(User loginUser, int queueId);
 }
