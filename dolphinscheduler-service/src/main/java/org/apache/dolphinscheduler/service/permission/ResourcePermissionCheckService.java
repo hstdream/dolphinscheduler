@@ -21,6 +21,7 @@ package org.apache.dolphinscheduler.service.permission;
 import org.apache.dolphinscheduler.common.enums.AuthorizationType;
 import org.slf4j.Logger;
 
+import java.util.List;
 import java.util.Set;
 
 public interface ResourcePermissionCheckService<T> {

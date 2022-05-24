@@ -27,7 +27,6 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-
 /**
  * project mapper interface
  */
@@ -136,4 +135,16 @@ public interface ProjectMapper extends BaseMapper<Project> {
      * @return
      */
     <T> List<Project> listAuthorizedProjects (@Param("userId") int userId, @Param("projectsIds")T[] projectsIds);
+
+    /**
+     * project page
+     * @param page page
+     * @param userId userId
+     * @param searchName searchName
+     * @param projectsIds projectsIds
+     * @return project Ipage
+     */
+    <T> IPage<Project> listAuthorizedProjectsPaging(IPage<Project> page,
+                                          @Param("userId") int userId,
+                                          @Param("searchName") String searchName, @Param("projectsIds")T[] projectsIds);
 }

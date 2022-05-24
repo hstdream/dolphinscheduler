@@ -23,8 +23,12 @@ import org.apache.dolphinscheduler.dao.entity.*;
 import org.apache.dolphinscheduler.dao.mapper.*;
 import org.apache.dolphinscheduler.service.process.ProcessService;
 import org.slf4j.Logger;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -35,15 +39,17 @@ import static java.util.stream.Collectors.toSet;
  * resource permission check
  */
 @Component
-public class ResourcePermissionCheckServiceImpl implements ResourcePermissionCheckService<Object> {
+@Service
+public class ResourcePermissionCheckServiceImpl implements ResourcePermissionCheckService<Object>, ApplicationContextAware {
 
     @Autowired
     private ProcessService processService;
 
     protected static final Map<AuthorizationType, ResourceAcquisitionAndPermissionCheck<?>> RESOURCE_LIST_MAP = new ConcurrentHashMap<>();
 
-    static {
-        for (ResourceAcquisitionAndPermissionCheck<?> authorizedResourceList : ServiceLoader.load(ResourceAcquisitionAndPermissionCheck.class)) {
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        for (ResourceAcquisitionAndPermissionCheck<?> authorizedResourceList : applicationContext.getBeansOfType(ResourceAcquisitionAndPermissionCheck.class).values()) {
             List<AuthorizationType> authorizationTypes = authorizedResourceList.authorizationTypes();
             authorizationTypes.forEach(auth -> RESOURCE_LIST_MAP.put(auth, authorizedResourceList));
         }
@@ -76,109 +82,7 @@ public class ResourcePermissionCheckServiceImpl implements ResourcePermissionChe
     }
 
     @Component
-    public static class ResourceFileIdAndUdfFileResourceList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<String> {
-
-        private final ResourceMapper resourceMapper;
-
-        public ResourceFileIdAndUdfFileResourceList(ResourceMapper resourceMapper) {
-            this.resourceMapper = resourceMapper;
-        }
-
-        @Override
-        public List<AuthorizationType> authorizationTypes() {
-            return Arrays.asList(AuthorizationType.RESOURCE_FILE_ID, AuthorizationType.UDF_FILE);
-        }
-
-        @Override
-        public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
-        }
-
-        @Override
-        public Set<String> listAuthorizedResource(int userId, Logger logger) {
-            // TODO  改造listAuthorizedResourceById方法 资源权限专用方法
-            return resourceMapper.listAuthorizedResourceById(userId, null).stream().map(Resource::getFullName).collect(toSet());
-        }
-    }
-
-    @Component
-    public static class ResourceFileNameResourceList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<String> {
-
-        private final ResourceMapper resourceMapper;
-
-        public ResourceFileNameResourceList(ResourceMapper resourceMapper) {
-            this.resourceMapper = resourceMapper;
-        }
-
-        @Override
-        public List<AuthorizationType> authorizationTypes() {
-            return Collections.singletonList(AuthorizationType.RESOURCE_FILE_NAME);
-        }
-
-        @Override
-        public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
-        }
-
-        @Override
-        public Set<String> listAuthorizedResource(int userId, Logger logger) {
-            // TODO  改造listAuthorizedResource方法 资源权限专用方法
-            return resourceMapper.listAuthorizedResource(userId, null).stream().map(Resource::getFullName).collect(toSet());
-        }
-    }
-
-    @Component
-    public static class DatasourceResourceList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<Integer> {
-
-        private final DataSourceMapper dataSourceMapper;
-
-        public DatasourceResourceList(DataSourceMapper dataSourceMapper) {
-            this.dataSourceMapper = dataSourceMapper;
-        }
-
-        @Override
-        public List<AuthorizationType> authorizationTypes() {
-            return Collections.singletonList(AuthorizationType.DATASOURCE);
-        }
-
-        @Override
-        public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
-        }
-
-        @Override
-        public Set<Integer> listAuthorizedResource(int userId, Logger logger) {
-            return dataSourceMapper.listAuthorizedDataSource(userId, null).stream().map(DataSource::getId).collect(toSet());
-        }
-    }
-
-    @Component
-    public static class UdfResourceList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<Integer> {
-
-        private final UdfFuncMapper udfFuncMapper;
-
-        public UdfResourceList(UdfFuncMapper udfFuncMapper) {
-            this.udfFuncMapper = udfFuncMapper;
-        }
-
-        @Override
-        public List<AuthorizationType> authorizationTypes() {
-            return Collections.singletonList(AuthorizationType.UDF);
-        }
-
-        @Override
-        public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
-        }
-
-        @Override
-        public Set<Integer> listAuthorizedResource(int userId, Logger logger) {
-            return udfFuncMapper.listAuthorizedUdfFunc(userId, null).stream().map(UdfFunc::getId).collect(toSet());
-        }
-    }
-
-    @Component
-    public static class ProjectsResourceList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<Integer> {
+    public static class ProjectsResourceList implements ResourceAcquisitionAndPermissionCheck<Integer> {
 
         private final ProjectMapper projectMapper;
 
@@ -193,88 +97,13 @@ public class ResourcePermissionCheckServiceImpl implements ResourcePermissionChe
 
         @Override
         public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
+            return true;
         }
+
 
         @Override
         public Set<Integer> listAuthorizedResource(int userId, Logger logger) {
             return projectMapper.listAuthorizedProjects(userId, null).stream().map(Project::getId).collect(toSet());
-        }
-    }
-
-    @Component
-    public static class WorkerGroupList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<Integer> {
-
-        private final WorkerGroupMapper workerGroupMapper;
-
-        public WorkerGroupList(WorkerGroupMapper workerGroupMapper) {
-            this.workerGroupMapper = workerGroupMapper;
-        }
-
-        @Override
-        public List<AuthorizationType> authorizationTypes() {
-            return Collections.singletonList(AuthorizationType.WORKER_GROUP);
-        }
-
-        @Override
-        public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
-        }
-
-        @Override
-        public Set<Integer> listAuthorizedResource(int userId, Logger logger) {
-            return workerGroupMapper.listAuthorizedWorkerGroup(userId, null).stream().map(WorkerGroup::getId).collect(toSet());
-        }
-    }
-
-    @Component
-    public static class AlertGroupList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<Integer> {
-
-        private final AlertGroupMapper alertGroupMapper;
-
-        public AlertGroupList(AlertGroupMapper alertGroupMapper) {
-            this.alertGroupMapper = alertGroupMapper;
-        }
-
-        @Override
-        public List<AuthorizationType> authorizationTypes() {
-            return Collections.singletonList(AuthorizationType.ALERT_GROUP);
-        }
-
-        @Override
-        public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
-        }
-
-        @Override
-        public Set<Integer> listAuthorizedResource(int userId, Logger logger) {
-
-            return alertGroupMapper.listAuthorizedAlertGroup(userId, null).stream().map(AlertGroup::getId).collect(toSet());
-        }
-    }
-
-    @Component
-    public static class EnvironmentList extends AbstractResourcePermissionCheck implements ResourceAcquisitionAndPermissionCheck<Integer> {
-
-        private final EnvironmentMapper environmentMapper;
-
-        public EnvironmentList(EnvironmentMapper environmentMapper) {
-            this.environmentMapper = environmentMapper;
-        }
-
-        @Override
-        public List<AuthorizationType> authorizationTypes() {
-            return Collections.singletonList(AuthorizationType.ENVIRONMENT);
-        }
-
-        @Override
-        public boolean permissionCheck(int userId, String url, Logger logger) {
-            return super.operationPermissionCommonCheck(userId, logger);
-        }
-
-        @Override
-        public Set<Integer> listAuthorizedResource(int userId, Logger logger) {
-            return environmentMapper.listAuthorizedEnvironment(userId, null).stream().map(Environment::getId).collect(toSet());
         }
     }
 
@@ -300,5 +129,6 @@ public class ResourcePermissionCheckServiceImpl implements ResourcePermissionChe
          * @return
          */
         boolean permissionCheck(int userId, String url, Logger logger);
+
     }
 }
