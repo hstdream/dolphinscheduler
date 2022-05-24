@@ -37,6 +37,7 @@ type SourceType = 'MYSQL' | 'HDFS' | 'HIVE'
 type ModelType = 'import' | 'export'
 type RelationType = 'AND' | 'OR'
 type ITaskType = TaskType
+type IDateType = 'hour' | 'day' | 'week' | 'month'
 
 interface IOption {
   label: string
@@ -197,6 +198,13 @@ interface IRuleParameters {
   src_connector_type?: number
   src_datasource_id?: number
   src_table?: string
+  field_length?: number
+  begin_time?: string
+  deadline?: string
+  datetime_format?: string
+  target_filter?: string
+  regexp_pattern?: string
+  enum_list?: string
   src_filter?: string
   src_field?: string
   statistics_execute_sql?: string
@@ -289,6 +297,14 @@ interface ITaskParams {
   zeppelinParagraphId?: string
   noteId?: string
   paragraphId?: string
+  condaEnvName?: string
+  inputNotePath?: string
+  outputNotePath?: string
+  parameters?: string
+  kernel?: string
+  engine?: string
+  executionTimeout?: string
+  startTimeout?: string
   processDefinitionCode?: number
   conditionResult?: {
     successNode?: number[]
@@ -297,6 +313,28 @@ interface ITaskParams {
   udfs?: string
   connParams?: string
   targetJobName?: string
+  cluster?: string
+  namespace?: string
+  clusterNamespace?: string
+  minCpuCores?: string
+  minMemorySpace?: string
+  image?: string
+  algorithm?: string
+  params?: string
+  searchParams?: string
+  dataPath?: string
+  experimentName?: string
+  modelName?: string
+  mlflowTrackingUri?: string
+  mlflowJobType?: string
+  automlTool?: string
+  registerModel?: boolean
+  mlflowTaskType?: string
+  mlflowProjectRepository?: string
+  mlflowProjectVersion?: string
+  deployType?: string
+  deployPort?: string
+  deployModelKey?: string
 }
 
 interface INodeData
@@ -383,5 +421,6 @@ export {
   IJsonItem,
   FormRules,
   IJsonItemParams,
-  IResponseJsonItem
+  IResponseJsonItem,
+  IDateType
 }
